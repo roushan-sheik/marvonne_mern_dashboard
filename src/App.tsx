@@ -91,7 +91,8 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed pb-16 md:pb-0">
+        <div className="flex-1 overflow-x-hidden overflow-y-auto">
         {/* Mobile Header */}
         <header className="md:hidden h-16 bg-[#0a192f] text-white border-b border-white/10 flex items-center justify-between px-4">
           <div className="flex items-center">
@@ -104,8 +105,40 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           </button>
         </header>
 
-        <div className="p-6 md:p-10 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
           {children}
+        </div>
+        </div>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#0a192f] border-t border-white/10 flex items-center justify-around z-50">
+          <Link
+            to="/"
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+              location.pathname === '/' ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <BookOpen className="w-5 h-5" />
+            <span className="text-[10px] font-semibold">Stories</span>
+          </Link>
+          <Link
+            to="/create"
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+              location.pathname === '/create' ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <PlusCircle className="w-5 h-5" />
+            <span className="text-[10px] font-semibold">Create</span>
+          </Link>
+          <Link
+            to="/settings"
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+              location.pathname === '/settings' ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <SettingsIcon className="w-5 h-5" />
+            <span className="text-[10px] font-semibold">Settings</span>
+          </Link>
         </div>
       </main>
     </div>

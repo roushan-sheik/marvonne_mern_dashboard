@@ -143,14 +143,14 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Stories</h1>
           <p className="text-gray-500 mt-1">Manage and view your generated stories.</p>
         </div>
         <Link
           to="/create"
-          className="flex items-center px-5 py-2.5 bg-[#bef264] text-[#0a192f] font-bold rounded-full hover:bg-[#bef264]-hover transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 duration-200"
+          className="flex items-center justify-center w-full sm:w-auto px-5 py-2.5 bg-[#bef264] text-[#0a192f] font-bold rounded-full hover:bg-[#bef264]-hover transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 duration-200"
         >
           <PlusCircle className="w-5 h-5 mr-2" />
           Create New Story

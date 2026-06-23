@@ -69,7 +69,7 @@ export default function CreateStory() {
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] md:h-screen -m-6 md:-m-10 p-4 md:p-8 flex flex-col overflow-hidden relative">
+    <div className="h-[calc(100vh-100px)] md:h-screen -m-4 sm:-m-6 md:-m-10 p-4 md:p-8 flex flex-col overflow-hidden relative">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
 
       <div className="flex-1 flex flex-col max-w-2xl w-full mx-auto overflow-hidden relative z-10">
