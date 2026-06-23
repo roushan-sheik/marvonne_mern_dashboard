@@ -6,7 +6,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import CreateStory from './pages/CreateStory';
 import StoryPreview from './pages/StoryPreview';
-import { LogOut, BookOpen, PlusCircle } from 'lucide-react';
+import Settings from './pages/Settings';
+import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
 import { Link, useLocation } from 'react-router-dom';
@@ -66,6 +67,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <PlusCircle className="w-5 h-5 mr-3" />
             Create Story
           </Link>
+          <Link
+            to="/settings"
+            className={`flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+              location.pathname === '/settings'
+                ? 'bg-[#bef264] text-[#0a192f] shadow-[0_0_15px_rgba(190,242,100,0.4)]'
+                : 'text-gray-300 hover:bg-white/10 hover:text-white hover:translate-x-1'
+            }`}
+          >
+            <SettingsIcon className="w-5 h-5 mr-3" />
+            Settings
+          </Link>
         </nav>
         <div className="p-4 border-t border-white/10">
           <button
@@ -120,6 +132,16 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <CreateStory />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <Settings />
             </AdminLayout>
           </ProtectedRoute>
         }

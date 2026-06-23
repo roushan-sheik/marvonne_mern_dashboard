@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { usePreviewStoryQuery } from '../store/apiSlice';
-import { Loader2, ChevronLeft, ChevronRight, ArrowDown } from 'lucide-react';
+import { usePreviewStoryQuery, useRegeneratePageIllustrationMutation } from '../store/apiSlice';
+import { Loader2, ChevronLeft, ChevronRight, ArrowDown, RefreshCw, Brain } from 'lucide-react';
 
 export default function StoryPreview() {
   const { id } = useParams<{ id: string }>();
@@ -10,6 +10,7 @@ export default function StoryPreview() {
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [currentParaIndex, setCurrentParaIndex] = useState(0);
+  const [regenerateImage, { isLoading: isRegenerating }] = useRegeneratePageIllustrationMutation();
 
   // If story data changes, reset to page 0
   useEffect(() => {
@@ -40,14 +41,13 @@ export default function StoryPreview() {
   const currentPage = pages[currentPageIndex];
   
   // Use a fallback image if individual page images aren't available yet
-  const pageImage = currentPage.image_url || story.cover_image || "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=1000";
+  const pageImage = currentPage.default_image || story.cover_image || "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=1000";
 
-  // Split content into paragraphs or sentences if it's too long
-  let chunks = currentPage.default_text.split(/\n+/).filter((p: string) => p.trim().length > 0);
-  if (chunks.length === 1 && chunks[0].length > 150) {
-    // If it's one massive block, split by sentences roughly
-    chunks = chunks[0].match(/[^.!?]+[.!?]+/g) || [chunks[0]];
-    chunks = chunks.map((c: string) => c.trim()).filter((c: string) => c.length > 0);
+  // Split content into chunks of ~25 words to strictly enforce the 20-28 words max rule
+  const words = (currentPage.default_text || "").split(/\s+/).filter(Boolean);
+  const chunks: string[] = [];
+  for (let i = 0; i < words.length; i += 25) {
+    chunks.push(words.slice(i, i + 25).join(" "));
   }
 
   const handlePrev = () => {
@@ -73,6 +73,14 @@ export default function StoryPreview() {
   const handleNextPara = () => {
     if (currentParaIndex < chunks.length - 1) {
       setCurrentParaIndex(prev => prev + 1);
+    }
+  };
+
+  const handleRegenerateImage = async () => {
+    try {
+      await regenerateImage(currentPage.id).unwrap();
+    } catch (err: any) {
+      alert(err?.data?.message || err?.message || 'Failed to regenerate image');
     }
   };
 
@@ -112,12 +120,34 @@ export default function StoryPreview() {
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1px] bg-black/5 z-20"></div>
 
           {/* Left Page (Image) */}
-          <div className="w-full md:w-1/2 h-[45%] md:h-full relative bg-gray-100 shrink-0">
+          <div className="w-full md:w-1/2 h-[45%] md:h-full relative bg-gray-100 shrink-0 group">
             <img 
               src={pageImage} 
               alt={`Page ${currentPage.page_number} illustration`} 
-              className="absolute inset-0 w-full h-full object-cover"
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isRegenerating ? 'opacity-40 blur-sm' : 'opacity-100'}`}
             />
+            
+            {/* Loading Overlay */}
+            {isRegenerating && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10 z-20">
+                <div className="bg-white/90 backdrop-blur-md p-4 rounded-3xl shadow-xl flex flex-col items-center">
+                  <Brain className="w-8 h-8 text-[#0d9488] animate-pulse mb-2" />
+                  <p className="text-[#0f3a4a] font-bold text-sm">Crafting Magic...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Update Illustration Button */}
+            {!isRegenerating && (
+              <button
+                onClick={handleRegenerateImage}
+                className="absolute bottom-4 left-4 z-30 flex items-center px-4 py-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs md:text-sm font-bold rounded-full transition-all opacity-0 md:group-hover:opacity-100 md:opacity-0 shadow-lg"
+                style={{ opacity: window.innerWidth < 768 ? 1 : undefined }} // Always show on mobile, hover on desktop
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Update Illustration
+              </button>
+            )}
           </div>
 
           {/* Right Page (Text) */}
@@ -135,29 +165,24 @@ export default function StoryPreview() {
                 </div>
               </div>
 
-              {/* Text Content area (scrollable if needed, but we do chunking) */}
-              <div className="flex-1 overflow-y-auto pr-2 hide-scrollbar flex flex-col justify-center">
-                <div className="space-y-4">
-                  {/* Show all chunks up to the currentParaIndex for a progressive reading experience, OR just show the current chunk. Let's show up to currentParaIndex to build the story. */}
-                  {chunks.slice(0, currentParaIndex + 1).map((chunk: string, idx: number) => (
-                    <p 
-                      key={idx} 
-                      className={`font-serif text-lg md:text-3xl text-gray-800 leading-relaxed md:leading-loose transition-opacity duration-500 ${idx === currentParaIndex ? 'opacity-100' : 'opacity-60 text-base md:text-xl'}`}
-                    >
-                      {chunk}
-                    </p>
-                  ))}
+              {/* Text Content area */}
+              <div className="flex-1 flex flex-col justify-center relative px-2 md:px-0">
+                {/* Animated transition between chunks */}
+                <div className="relative w-full">
+                  <p className="font-serif text-xl md:text-3xl text-gray-800 leading-relaxed md:leading-loose animate-[fadeIn_0.5s_ease-out]">
+                    {chunks[currentParaIndex]}
+                  </p>
                 </div>
               </div>
 
-              {/* Next Paragraph Button */}
+              {/* Next Paragraph Button (Absolutely Positioned to avoid layout shift/overflow) */}
               {currentParaIndex < chunks.length - 1 && (
-                <div className="shrink-0 mt-4 flex justify-center">
+                <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-20">
                   <button 
                     onClick={handleNextPara}
-                    className="flex items-center text-sm md:text-base px-4 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-full hover:bg-indigo-100 transition-colors"
+                    className="flex items-center text-xs md:text-sm px-4 py-2 bg-gradient-to-r from-[#0d9488] to-[#0f3a4a] text-white font-bold rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
                   >
-                    Read More <ArrowDown className="w-4 h-4 ml-1 animate-bounce" />
+                    Next Paragraph <ChevronRight className="w-4 h-4 ml-1" />
                   </button>
                 </div>
               )}

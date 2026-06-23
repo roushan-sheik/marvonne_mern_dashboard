@@ -1,10 +1,129 @@
-import { useGetAllStoriesQuery } from '../store/apiSlice';
-import { Loader2, BookOpen, PlusCircle, Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useGetAllStoriesQuery, useRegenerateCoverImageMutation, useDeleteStoryMutation } from '../store/apiSlice';
+import { Loader2, BookOpen, PlusCircle, Eye, ChevronLeft, ChevronRight, Brain, RefreshCw, Trash2, X, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+function StoryCard({ story, onDeleteClick, isDeleting }: { story: any, onDeleteClick: (story: any) => void, isDeleting: boolean }) {
+  const [regenerateCoverImage, { isLoading: isRegenerating }] = useRegenerateCoverImageMutation();
+
+  const handleRegenerateCover = async () => {
+    try {
+      await regenerateCoverImage(story.id).unwrap();
+    } catch (err: any) {
+      alert(err?.data?.message || err?.message || 'Failed to regenerate cover image');
+    }
+  };
+
+  const handleDeleteStory = () => {
+    onDeleteClick(story);
+  };
+
+  return (
+    <div className={`bg-white rounded-3xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col hover:-translate-y-1 ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div className="h-64 bg-gradient-to-br from-[#0d9488]/20 to-[#0f3a4a]/20 relative overflow-hidden group/image">
+        {story.cover_image ? (
+          <img
+            src={story.cover_image}
+            alt={story.title}
+            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out ${isRegenerating ? 'opacity-40 blur-sm' : 'opacity-100'}`}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <BookOpen className={`w-16 h-16 text-[#0d9488]/40 ${isRegenerating ? 'opacity-40 blur-sm' : 'opacity-100'}`} />
+          </div>
+        )}
+
+        {/* Title Overlay Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex items-end p-5">
+          <h3 className="text-2xl font-extrabold text-white line-clamp-2 leading-tight drop-shadow-md">
+            {story.title}
+          </h3>
+        </div>
+        
+        {/* Loading Overlay */}
+        {isRegenerating && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10 z-20">
+            <div className="bg-white/90 backdrop-blur-md p-4 rounded-3xl shadow-xl flex flex-col items-center">
+              <Brain className="w-8 h-8 text-[#0d9488] animate-pulse mb-2" />
+              <p className="text-[#0f3a4a] font-bold text-xs text-center">Crafting<br/>Cover...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons Group */}
+        {!isRegenerating && (
+          <div className="absolute top-4 left-4 z-30 flex items-center space-x-2 opacity-0 lg:group-hover/image:opacity-100 transition-all" style={{ opacity: window.innerWidth < 1024 ? 1 : undefined }}>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handleRegenerateCover();
+              }}
+              className="flex items-center px-3 py-1.5 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-bold rounded-full transition-all shadow-lg"
+            >
+              <RefreshCw className="w-3 h-3 mr-1.5" />
+              Update Cover
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteStory();
+              }}
+              className="flex items-center px-3 py-1.5 bg-red-500/80 hover:bg-red-600 backdrop-blur-md text-white text-xs font-bold rounded-full transition-all shadow-lg"
+            >
+              <Trash2 className="w-3 h-3 mr-1.5" />
+              Delete
+            </button>
+          </div>
+        )}
+
+        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-[#0d9488] shadow-lg">
+          {story.age_group} yrs
+        </div>
+      </div>
+      <div className="p-5 flex-1 flex flex-col bg-white">
+        <p className="text-sm text-gray-600 line-clamp-3 flex-1 leading-relaxed">
+          {story.description}
+        </p>
+        <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+          <span className="text-xs font-bold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+            {story.page_count} Pages
+          </span>
+          <Link
+            to={`/preview/${story.id}`}
+            className="flex items-center text-sm font-extrabold text-[#0d9488] hover:text-[#0a192f] transition-colors"
+          >
+            <Eye className="w-4 h-4 mr-1.5" />
+            Preview Story
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
-  const { data, isLoading, isError } = useGetAllStoriesQuery({});
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError, isFetching } = useGetAllStoriesQuery({ page, limit: 9 });
+  const [deleteStory, { isLoading: isDeletingStory }] = useDeleteStoryMutation();
+  
+  const [storyToDelete, setStoryToDelete] = useState<any>(null);
+  const [toastMsg, setToastMsg] = useState('');
+
   const stories = data?.data || [];
+  const meta = data?.meta;
+
+  const confirmDelete = async () => {
+    if (!storyToDelete) return;
+    try {
+      await deleteStory(storyToDelete.id).unwrap();
+      setToastMsg(`"${storyToDelete.title}" deleted successfully`);
+      setTimeout(() => setToastMsg(''), 4000);
+    } catch (err: any) {
+      alert(err?.data?.message || err?.message || 'Failed to delete story');
+    } finally {
+      setStoryToDelete(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -39,63 +158,97 @@ export default function Dashboard() {
       </div>
 
       {stories.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
-          <BookOpen className="mx-auto h-16 w-16 text-[#0d9488]/30 mb-4" />
-          <h3 className="text-xl font-bold text-gray-900">No stories yet</h3>
-          <p className="mt-2 text-gray-500 max-w-md mx-auto">Turn your child's name and photo into a beautifully illustrated, personalized storybook they'll cherish forever.</p>
-          <div className="mt-8">
-            <Link
-              to="/create"
-              className="inline-flex items-center px-6 py-3 border border-transparent shadow-lg text-sm font-bold rounded-full text-[#0a192f] bg-[#bef264] hover:bg-[#bef264]-hover transition-colors hover:-translate-y-0.5"
-            >
-              <PlusCircle className="w-5 h-5 mr-2 -ml-1" />
-              Start Your Adventure
-            </Link>
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center">
+          <div className="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="w-10 h-10" />
           </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">No stories generated yet</h2>
+          <p className="text-gray-500 mb-6">Create your first story to get started.</p>
+          <Link
+            to="/create"
+            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+          >
+            <PlusCircle className="w-5 h-5 mr-2" />
+            Create First Story
+          </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {stories.map((story: any) => (
-            <div
-              key={story.id}
-              className="bg-white rounded-3xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col hover:-translate-y-1"
-            >
-              <div className="h-56 bg-gradient-to-br from-[#0d9488]/20 to-[#0f3a4a]/20 relative overflow-hidden">
-                {story.cover_image ? (
-                  <img
-                    src={story.cover_image}
-                    alt={story.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <BookOpen className="w-16 h-16 text-[#0d9488]/40" />
-                  </div>
-                )}
-                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-[#0d9488] shadow-lg">
-                  {story.age_group} yrs
-                </div>
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-xl font-extrabold text-gray-900 line-clamp-1">{story.title}</h3>
-                <p className="text-sm text-gray-600 mt-3 line-clamp-2 flex-1 leading-relaxed">
-                  {story.description}
-                </p>
-                <div className="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-400 bg-gray-50 px-3 py-1 rounded-full">
-                    {story.page_count} Pages
-                  </span>
-                  <Link
-                    to={`/preview/${story.id}`}
-                    className="flex items-center text-sm font-bold text-[#0d9488] hover:text-[#0a192f] transition-colors"
-                  >
-                    <Eye className="w-4 h-4 mr-1.5" />
-                    Preview Story
-                  </Link>
-                </div>
-              </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {stories.map((story: any) => (
+              <StoryCard 
+                key={story.id} 
+                story={story} 
+                onDeleteClick={setStoryToDelete} 
+                isDeleting={isDeletingStory && storyToDelete?.id === story.id} 
+              />
+            ))}
+          </div>
+          
+          {/* Pagination Controls */}
+          {meta && meta.total > meta.limit && (
+            <div className="mt-12 flex justify-center items-center space-x-4">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1 || isFetching}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </button>
+              <span className="text-sm font-medium text-gray-500">
+                Page {meta.page} of {Math.ceil(meta.total / meta.limit)}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(Math.ceil(meta.total / meta.limit), p + 1))}
+                disabled={page >= Math.ceil(meta.total / meta.limit) || isFetching}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </button>
             </div>
-          ))}
+          )}
+        </>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {storyToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Story</h3>
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+              Are you sure you want to delete <span className="font-bold text-gray-900">"{storyToDelete.title}"</span>? This will permanently delete the story and all its generated pages and books. This cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setStoryToDelete(null)}
+                className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                disabled={isDeletingStory}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex items-center px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50"
+                disabled={isDeletingStory}
+              >
+                {isDeletingStory ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center bg-[#0a192f] text-white px-5 py-3.5 rounded-2xl shadow-xl animate-in slide-in-from-bottom-5">
+          <CheckCircle className="w-5 h-5 text-[#bef264] mr-3" />
+          <p className="text-sm font-medium">{toastMsg}</p>
+          <button onClick={() => setToastMsg('')} className="ml-4 text-gray-400 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>

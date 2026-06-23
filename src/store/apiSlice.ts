@@ -28,7 +28,7 @@ export const apiSlice = createApi({
       }),
     }),
     getAllStories: builder.query({
-      query: () => '/story/all-stories',
+      query: ({ page = 1, limit = 9 } = {}) => `/story/all-stories?page=${page}&limit=${limit}`,
       providesTags: ['Story'],
     }),
     previewStory: builder.query({
@@ -43,6 +43,39 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['Story'],
     }),
+    regeneratePageIllustration: builder.mutation({
+      query: ({ storyId, pageId }) => ({
+        url: `/story/page/${pageId}/regenerate-image`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Story'],
+    }),
+    regenerateCoverImage: builder.mutation({
+      query: (storyId) => ({
+        url: `/story/update-story/${storyId}/regenerate-cover`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Story'],
+    }),
+    deleteStory: builder.mutation({
+      query: (storyId) => ({
+        url: `/story/delete-story/${storyId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Story'],
+    }),
+    getSettings: builder.query({
+      query: () => '/settings',
+      providesTags: ['Settings'],
+    }),
+    updateSettings: builder.mutation({
+      query: (settingsData) => ({
+        url: '/settings',
+        method: 'PUT',
+        body: settingsData,
+      }),
+      invalidatesTags: ['Settings'],
+    }),
   }),
 });
 
@@ -52,4 +85,9 @@ export const {
   useGetAllStoriesQuery,
   usePreviewStoryQuery,
   useCreateStoryMutation,
+  useRegeneratePageIllustrationMutation,
+  useRegenerateCoverImageMutation,
+  useDeleteStoryMutation,
+  useGetSettingsQuery,
+  useUpdateSettingsMutation,
 } = apiSlice;

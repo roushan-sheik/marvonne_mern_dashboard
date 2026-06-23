@@ -2,24 +2,27 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { useCreateStoryMutation } from '../store/apiSlice';
-import { Wand2, Loader2, ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useGetSettingsQuery, useCreateStoryMutation } from '../store/apiSlice';
+import { Wand2, Loader2, ArrowLeft, Brain } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-
-const createStorySchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  age_group: z.string().min(1, 'Age group is required'),
-  page_count: z.number().min(1, 'Must have at least 1 page').max(20, 'Max 20 pages'),
-});
-
-type CreateStoryForm = z.infer<typeof createStorySchema>;
 
 export default function CreateStory() {
   const navigate = useNavigate();
   const [createStory, { isLoading }] = useCreateStoryMutation();
+  const { data: settingsResponse } = useGetSettingsQuery({});
+  const maxPages = settingsResponse?.data?.max_pages || 20;
+
   const [errorMsg, setErrorMsg] = useState('');
+
+  const createStorySchema = useMemo(() => z.object({
+    title: z.string().min(1, 'Title is required'),
+    description: z.string().min(10, 'Description must be at least 10 characters'),
+    age_group: z.string().min(1, 'Age group is required'),
+    page_count: z.number().min(1, 'Must have at least 1 page').max(maxPages, `Max ${maxPages} pages`),
+  }), [maxPages]);
+
+  type CreateStoryForm = z.infer<typeof createStorySchema>;
 
   const {
     register,
@@ -45,139 +48,173 @@ export default function CreateStory() {
       await createStory(formData).unwrap();
       navigate('/');
     } catch (err: any) {
-      setErrorMsg(err?.data?.message || 'Failed to create story');
+      let msg = err?.data?.message || err?.message || 'Failed to create story';
+
+      // Try to parse if the backend returns stringified JSON (like Gemini errors)
+      try {
+        if (typeof msg === 'string' && msg.trim().startsWith('{')) {
+          const parsed = JSON.parse(msg);
+          if (parsed?.error?.message) {
+            msg = parsed.error.message;
+          } else if (parsed?.message) {
+            msg = parsed.message;
+          }
+        }
+      } catch (e) {
+        // Ignore parse error, just use the raw string
+      }
+
+      setErrorMsg(msg);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-12">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-        <div className="flex items-center">
-          <Link to="/" className="mr-4 p-2.5 text-gray-400 hover:text-[#0d9488] hover:bg-[#0d9488]/10 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 flex items-center tracking-tight">
-              <Wand2 className="w-8 h-8 text-[#0d9488] mr-3" />
-              Generate Magic Story
-            </h1>
-            <p className="text-gray-500 mt-1.5 text-lg">Let AI craft a beautiful children's book for you.</p>
+    <div className="h-[calc(100vh-64px)] md:h-screen -m-6 md:-m-10 p-4 md:p-8 flex flex-col overflow-hidden relative">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+
+      <div className="flex-1 flex flex-col max-w-2xl w-full mx-auto overflow-hidden relative z-10">
+
+        {/* Header - Compact */}
+        <div className="shrink-0 flex items-center justify-between mb-6 bg-white/60 backdrop-blur-md p-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-white">
+          <div className="flex items-center">
+            <Link to="/" className="mr-4 p-2.5 bg-white text-gray-500 hover:text-indigo-600 shadow-sm hover:shadow rounded-full transition-all border border-gray-100">
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+            <div>
+              <h1 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
+                <Wand2 className="w-5 h-5 text-indigo-600 mr-2" />
+                Generate Magic Story
+              </h1>
+              <p className="text-gray-500 text-xs mt-0.5">Let AI craft a beautiful children's book.</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 md:p-10 relative overflow-hidden">
-        {/* Decorative background circle */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#bef264]/20 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Main Content Area - Scrollable but fits in screen */}
+        <div className="flex-1 overflow-y-auto hide-scrollbar bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-6 md:p-8 relative">
 
-        {isLoading ? (
-          <div className="py-16 flex flex-col items-center justify-center space-y-8 relative z-10 min-h-[400px]">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#0d9488] to-[#bef264] rounded-full blur-xl opacity-50 animate-pulse"></div>
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center relative shadow-2xl border-4 border-[#e8f7ec]">
-                <Wand2 className="w-10 h-10 text-[#0d9488] animate-bounce" />
-              </div>
-            </div>
-            
-            <div className="space-y-4 w-full max-w-md flex flex-col items-center animate-pulse">
-              <div className="h-8 w-64 bg-gray-200 rounded-full overflow-hidden relative">
-                 <div className="absolute top-0 bottom-0 left-0 w-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-              </div>
-              <div className="h-4 w-full bg-gray-100 rounded-full"></div>
-              <div className="h-4 w-5/6 bg-gray-100 rounded-full"></div>
-              <div className="h-4 w-3/4 bg-gray-100 rounded-full"></div>
-            </div>
-
-            <div className="text-center mt-6">
-              <h3 className="text-2xl font-extrabold text-[#0a192f] bg-clip-text text-transparent bg-gradient-to-r from-[#0d9488] to-[#0a192f] animate-pulse mb-2">
-                Sprinkling Magic Dust...
-              </h3>
-              <p className="text-gray-500 font-medium text-lg">AI is writing and illustrating your story.</p>
-              <p className="text-gray-400 text-sm mt-1">This might take a minute.</p>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 relative z-10">
-            {errorMsg && (
-              <div className="bg-red-50 text-red-600 text-sm p-4 rounded-2xl border border-red-100 font-medium">
-                {errorMsg}
-              </div>
-            )}
-
-            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-              <label className="block text-base font-bold text-gray-900 mb-2">
-                Rough Title
-              </label>
-              <input
-                type="text"
-                {...register('title')}
-                placeholder="e.g. A boy in the forest"
-                className="w-full px-5 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-[#0d9488]/20 focus:border-[#0d9488] outline-none transition-all bg-white text-lg"
-              />
-              {errors.title && <p className="mt-2 text-sm text-red-500 font-medium">{errors.title.message}</p>}
-              <p className="mt-2 text-sm text-gray-500 flex items-center">
-                <Wand2 className="w-4 h-4 mr-1 text-[#0d9488]" /> AI will magically enhance your title!
-              </p>
-            </div>
-
-            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-              <label className="block text-base font-bold text-gray-900 mb-2">
-                Story Idea / Description
-              </label>
-              <textarea
-                {...register('description')}
-                rows={5}
-                placeholder="e.g. There is a cat and a dog in the forest..."
-                className="w-full px-5 py-4 border border-gray-200 rounded-xl focus:ring-4 focus:ring-[#0d9488]/20 focus:border-[#0d9488] outline-none transition-all resize-none bg-white text-lg"
-              />
-              {errors.description && <p className="mt-2 text-sm text-red-500 font-medium">{errors.description.message}</p>}
-              <p className="mt-2 text-sm text-gray-500 flex items-center">
-                <Wand2 className="w-4 h-4 mr-1 text-[#0d9488]" /> AI will expand this into a full story description.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                <label className="block text-base font-bold text-gray-900 mb-2">
-                  Age Group
-                </label>
-                <select
-                  {...register('age_group')}
-                  className="w-full px-5 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-[#0d9488]/20 focus:border-[#0d9488] outline-none bg-white text-lg cursor-pointer"
-                >
-                  <option value="">Select age group</option>
-                  <option value="0-3">0-3 years</option>
-                  <option value="3-7">3-7 years</option>
-                  <option value="8-12">8-12 years</option>
-                </select>
-                {errors.age_group && <p className="mt-2 text-sm text-red-500 font-medium">{errors.age_group.message}</p>}
+          {isLoading ? (
+            <div className="h-full flex flex-col items-center justify-center space-y-6 relative z-10 min-h-[400px]">
+              {/* Premium AI Spinner */}
+              <div className="relative flex justify-center items-center w-24 h-24 mb-4">
+                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full blur-2xl opacity-20 animate-pulse"></div>
+                <div className="relative bg-white/80 backdrop-blur-sm p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white flex items-center justify-center hover:scale-105 transition-transform duration-500">
+                  <Brain className="w-10 h-10 text-indigo-600 animate-pulse" />
+                </div>
               </div>
 
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                <label className="block text-base font-bold text-gray-900 mb-2">
-                  Number of Pages
+              <div className="w-full max-w-sm space-y-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 shrink-0 bg-indigo-50/80 rounded-2xl animate-pulse flex items-center justify-center">
+                    <div className="w-5 h-5 bg-indigo-200 rounded-md"></div>
+                  </div>
+                  <div className="flex-1 space-y-3">
+                    <div className="h-3 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-full w-full bg-[length:200%_100%] animate-[shimmer_2s_linear_infinite]"></div>
+                    <div className="h-3 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-full w-5/6 bg-[length:200%_100%] animate-[shimmer_2s_linear_infinite_0.3s]"></div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 shrink-0 bg-purple-50/80 rounded-2xl animate-pulse flex items-center justify-center">
+                    <div className="w-5 h-5 bg-purple-200 rounded-md"></div>
+                  </div>
+                  <div className="flex-1 space-y-3">
+                    <div className="h-3 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-full w-11/12 bg-[length:200%_100%] animate-[shimmer_2s_linear_infinite_0.6s]"></div>
+                    <div className="h-3 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-full w-4/6 bg-[length:200%_100%] animate-[shimmer_2s_linear_infinite_0.9s]"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center mt-10">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight mb-2">
+                  Generating...
+                </h3>
+                <p className="text-gray-500 text-sm md:text-base font-medium">Crafting magical characters and illustrations</p>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10 flex flex-col h-full">
+              {errorMsg && (
+                <div className="bg-red-50 text-red-600 text-sm p-4 rounded-xl border border-red-100 font-medium shrink-0 flex items-start shadow-sm">
+                  <div className="mr-3 mt-0.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></div>
+                  {errorMsg}
+                </div>
+              )}
+
+              <div className="shrink-0 group">
+                <label className="block text-sm font-bold text-gray-700 mb-2 group-focus-within:text-indigo-600 transition-colors">
+                  Rough Title
                 </label>
                 <input
-                  type="number"
-                  {...register('page_count', { valueAsNumber: true })}
-                  className="w-full px-5 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-[#0d9488]/20 focus:border-[#0d9488] outline-none bg-white text-lg"
+                  type="text"
+                  {...register('title')}
+                  placeholder="e.g. A boy in the forest"
+                  className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 hover:border-gray-300 outline-none transition-all text-sm shadow-sm"
                 />
-                {errors.page_count && <p className="mt-2 text-sm text-red-500 font-medium">{errors.page_count.message}</p>}
+                {errors.title && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.title.message}</p>}
               </div>
-            </div>
 
-            <div className="pt-6 flex justify-end">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full md:w-auto flex items-center justify-center px-8 py-4 bg-[#bef264] text-[#0a192f] rounded-full font-extrabold text-lg hover:bg-[#a3e635] focus:ring-4 focus:ring-[#bef264]/30 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
-              >
-                <Wand2 className="w-6 h-6 mr-3" />
-                Generate Magic Story
-              </button>
-            </div>
-          </form>
-        )}
+              <div className="shrink-0 group">
+                <div className="flex justify-between items-end mb-2">
+                  <label className="block text-sm font-bold text-gray-700 group-focus-within:text-indigo-600 transition-colors">
+                    Story Idea / Description
+                  </label>
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-500 flex items-center bg-indigo-50 px-2 py-0.5 rounded-full">
+                    <Brain className="w-3 h-3 mr-1" /> AI Powered
+                  </span>
+                </div>
+                <textarea
+                  {...register('description')}
+                  rows={4}
+                  placeholder="e.g. There is a cat and a dog in the forest..."
+                  className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 hover:border-gray-300 outline-none transition-all resize-none text-sm shadow-sm"
+                />
+                {errors.description && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.description.message}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-5 shrink-0">
+                <div className="group">
+                  <label className="block text-sm font-bold text-gray-700 mb-2 group-focus-within:text-indigo-600 transition-colors">
+                    Age Group
+                  </label>
+                  <select
+                    {...register('age_group')}
+                    className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 hover:border-gray-300 outline-none transition-all text-sm shadow-sm cursor-pointer appearance-none"
+                  >
+                    <option value="">Select age group</option>
+                    <option value="0-3">0-3 years</option>
+                    <option value="3-7">3-7 years</option>
+                    <option value="8-12">8-12 years</option>
+                  </select>
+                  {errors.age_group && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.age_group.message}</p>}
+                </div>
+
+                <div className="group">
+                  <label className="block text-sm font-bold text-gray-700 mb-2 group-focus-within:text-indigo-600 transition-colors">
+                    Pages
+                  </label>
+                  <input
+                    type="number"
+                    {...register('page_count', { valueAsNumber: true })}
+                    className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 hover:border-gray-300 outline-none transition-all text-sm shadow-sm"
+                  />
+                  {errors.page_count && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.page_count.message}</p>}
+                </div>
+              </div>
+
+              {/* Submit button anchored at the bottom */}
+              <div className="mt-auto pt-4 flex justify-end shrink-0 border-t border-gray-50">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full sm:w-auto flex items-center justify-center px-8 py-3.5 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 focus:ring-4 focus:ring-gray-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                >
+                  <Brain className="w-4 h-4 mr-2 text-indigo-400" />
+                  Generate Magic Story
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
