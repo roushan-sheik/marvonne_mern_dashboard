@@ -44,7 +44,7 @@ export const apiSlice = createApi({
       invalidatesTags: ['Story'],
     }),
     regeneratePageIllustration: builder.mutation({
-      query: ({ storyId, pageId }) => ({
+      query: (pageId) => ({
         url: `/story/page/${pageId}/regenerate-image`,
         method: 'POST',
       }),
@@ -76,6 +76,9 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['Settings'],
     }),
+    getStoryStatus: builder.query({
+      query: (id) => `/story/status/${id}`,
+    }),
   }),
 });
 
@@ -90,4 +93,5 @@ export const {
   useDeleteStoryMutation,
   useGetSettingsQuery,
   useUpdateSettingsMutation,
+  useGetStoryStatusQuery,
 } = apiSlice;

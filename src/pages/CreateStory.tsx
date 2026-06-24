@@ -2,18 +2,50 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { useGetSettingsQuery, useCreateStoryMutation } from '../store/apiSlice';
+import { useGetSettingsQuery, useCreateStoryMutation, useGetStoryStatusQuery } from '../store/apiSlice';
 import { Wand2, Loader2, ArrowLeft, Brain } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function CreateStory() {
   const navigate = useNavigate();
-  const [createStory, { isLoading }] = useCreateStoryMutation();
+  const [createStory, { isLoading: isCreating }] = useCreateStoryMutation();
   const { data: settingsResponse } = useGetSettingsQuery({});
   const maxPages = settingsResponse?.data?.max_pages || 20;
 
   const [errorMsg, setErrorMsg] = useState('');
+  const [pollingStoryId, setPollingStoryId] = useState<string | null>(() => {
+    return sessionStorage.getItem('pollingStoryId');
+  });
+
+  useEffect(() => {
+    if (pollingStoryId) {
+      sessionStorage.setItem('pollingStoryId', pollingStoryId);
+    } else {
+      sessionStorage.removeItem('pollingStoryId');
+    }
+  }, [pollingStoryId]);
+
+  const { data: statusData } = useGetStoryStatusQuery(pollingStoryId, {
+    skip: !pollingStoryId,
+    pollingInterval: 3000,
+  });
+
+  const storyStatus = statusData?.data;
+  const isLoading = isCreating || pollingStoryId !== null;
+
+  useEffect(() => {
+    if (storyStatus) {
+      if (storyStatus.status === 'COMPLETED') {
+        sessionStorage.removeItem('pollingStoryId');
+        navigate('/');
+      } else if (storyStatus.status === 'FAILED') {
+        sessionStorage.removeItem('pollingStoryId');
+        setErrorMsg(storyStatus.error_message || 'Failed to generate story');
+        setPollingStoryId(null);
+      }
+    }
+  }, [storyStatus, navigate]);
 
   const createStorySchema = useMemo(() => z.object({
     title: z.string().min(1, 'Title is required'),
@@ -45,8 +77,12 @@ export default function CreateStory() {
       formData.append('page_count', data.page_count.toString());
       formData.append('create_with_ai', 'true');
 
-      await createStory(formData).unwrap();
-      navigate('/');
+      const res = await createStory(formData).unwrap();
+      if (res?.data?.id) {
+        setPollingStoryId(res.data.id);
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       let msg = err?.data?.message || err?.message || 'Failed to create story';
 
@@ -126,9 +162,22 @@ export default function CreateStory() {
 
               <div className="text-center mt-10">
                 <h3 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight mb-2">
-                  Generating...
+                  {storyStatus ? `Generating... ${storyStatus.progress}%` : 'Starting...'}
                 </h3>
-                <p className="text-gray-500 text-sm md:text-base font-medium">Crafting magical characters and illustrations</p>
+                <p className="text-gray-500 text-sm md:text-base font-medium">
+                  {storyStatus?.status === 'PROCESSING_TEXT' && "Writing the magical story text..."}
+                  {storyStatus?.status === 'PROCESSING_IMAGES' && "Crafting beautiful illustrations..."}
+                  {!storyStatus && "Initializing..."}
+                </p>
+                {/* Progress bar */}
+                {storyStatus && (
+                  <div className="w-full max-w-sm mx-auto mt-6 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 ease-out"
+                      style={{ width: `${storyStatus.progress}%` }}
+                    ></div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
