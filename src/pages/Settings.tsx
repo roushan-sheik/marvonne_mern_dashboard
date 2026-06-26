@@ -1,14 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Settings as SettingsIcon, Save, Loader2, BookOpen, Layers } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Loader2, BookOpen, Layers, DollarSign } from 'lucide-react';
 import { useGetSettingsQuery, useUpdateSettingsMutation } from '../store/apiSlice';
 
 const settingsSchema = z.object({
   min_words_per_page: z.number().min(1, 'Minimum words must be at least 1'),
   max_words_per_page: z.number().min(1, 'Maximum words must be at least 1'),
   max_pages: z.number().min(1, 'Maximum pages must be at least 1'),
+  digital_price_per_page: z.number().min(0, 'Price cannot be negative'),
+  printed_price_per_page: z.number().min(0, 'Price cannot be negative'),
 }).refine(data => data.min_words_per_page <= data.max_words_per_page, {
   message: "Min words cannot be greater than max words",
   path: ["min_words_per_page"]
@@ -17,6 +19,7 @@ const settingsSchema = z.object({
 type SettingsForm = z.infer<typeof settingsSchema>;
 
 export default function Settings() {
+  const [toastMsg, setToastMsg] = useState('');
   const { data: settingsResponse, isLoading: isFetching } = useGetSettingsQuery({});
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSettingsMutation();
 
@@ -35,6 +38,8 @@ export default function Settings() {
         min_words_per_page: settingsResponse.data.min_words_per_page,
         max_words_per_page: settingsResponse.data.max_words_per_page,
         max_pages: settingsResponse.data.max_pages,
+        digital_price_per_page: settingsResponse.data.digital_price_per_page ?? 0.50,
+        printed_price_per_page: settingsResponse.data.printed_price_per_page ?? 1.00,
       });
     }
   }, [settingsResponse, reset]);
@@ -42,9 +47,12 @@ export default function Settings() {
   const onSubmit = async (data: SettingsForm) => {
     try {
       await updateSettings(data).unwrap();
-      // Optional: show a success toast here
+      setToastMsg("Settings saved successfully!");
+      setTimeout(() => setToastMsg(''), 3000);
     } catch (error) {
       console.error('Failed to update settings:', error);
+      setToastMsg("Failed to update settings");
+      setTimeout(() => setToastMsg(''), 3000);
     }
   };
 
@@ -133,6 +141,52 @@ export default function Settings() {
             
           </div>
 
+          {/* Pricing Section */}
+          <div className="mt-8 border-t border-gray-100 pt-6">
+            <div className="mb-4 flex items-center text-sm font-medium text-gray-900">
+              <DollarSign className="mr-2 h-4 w-4 text-emerald-500" />
+              Pricing Configuration (Per Page)
+            </div>
+            
+            <div className="grid gap-8 md:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm text-gray-700">Digital Book Price ($)</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500 sm:text-sm">$</span>
+                  </div>
+                  <input
+                    type="number"
+                    step="0.01"
+                    {...register('digital_price_per_page', { valueAsNumber: true })}
+                    className="w-full rounded-lg border border-gray-200 pl-7 pr-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                {errors.digital_price_per_page && (
+                  <p className="mt-1 text-xs font-medium text-red-500">{errors.digital_price_per_page.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm text-gray-700">Printed Book Price ($)</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500 sm:text-sm">$</span>
+                  </div>
+                  <input
+                    type="number"
+                    step="0.01"
+                    {...register('printed_price_per_page', { valueAsNumber: true })}
+                    className="w-full rounded-lg border border-gray-200 pl-7 pr-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                {errors.printed_price_per_page && (
+                  <p className="mt-1 text-xs font-medium text-red-500">{errors.printed_price_per_page.message}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="mt-8 flex justify-end border-t border-gray-100 pt-6">
             <button
               type="submit"
@@ -149,6 +203,13 @@ export default function Settings() {
           </div>
         </form>
       </div>
+      
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-4 right-4 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl animate-fade-in-up">
+          <p className="text-sm font-medium">{toastMsg}</p>
+        </div>
+      )}
     </div>
   );
 }
