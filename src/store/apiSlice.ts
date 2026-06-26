@@ -12,7 +12,7 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq', 'FollowUs'],
+  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq', 'FollowUs', 'Subscriber'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -154,6 +154,13 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['FollowUs'],
     }),
+    getSubscribers: builder.query({
+      query: (params) => {
+        const queryParams = new URLSearchParams(params).toString();
+        return `/admin/subscribers?${queryParams}`;
+      },
+      providesTags: ['Subscriber'],
+    }),
   }),
 });
 
@@ -179,4 +186,5 @@ export const {
   useDeleteFaqMutation,
   useGetFollowUsQuery,
   useUpdateFollowUsMutation,
+  useGetSubscribersQuery,
 } = apiSlice;
