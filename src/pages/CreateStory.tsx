@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useGetSettingsQuery, useCreateStoryMutation, useGetStoryStatusQuery } from '../store/apiSlice';
-import { Wand2, Loader2, ArrowLeft, Brain } from 'lucide-react';
+import { Wand2, ArrowLeft, Brain } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 

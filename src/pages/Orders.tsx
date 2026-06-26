@@ -1,4 +1,3 @@
-import React from 'react';
 import { useGetAllOrdersQuery } from '../store/apiSlice';
 import { ShoppingCart } from 'lucide-react';
 import { format } from 'date-fns';

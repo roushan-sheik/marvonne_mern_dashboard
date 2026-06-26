@@ -47,7 +47,11 @@ export const apiSlice = createApi({
       invalidatesTags: ['User'],
     }),
     getAllStories: builder.query({
-      query: ({ page = 1, limit = 9 } = {}) => `/story/all-stories?page=${page}&limit=${limit}`,
+      query: (args: { page?: number; limit?: number } | void) => {
+        const page = args?.page || 1;
+        const limit = args?.limit || 9;
+        return `/story/all-stories?page=${page}&limit=${limit}`;
+      },
       providesTags: ['Story'],
     }),
     previewStory: builder.query({

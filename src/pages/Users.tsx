@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useGetAllUsersQuery, useDeleteUserMutation, useUpdateUserStatusMutation } from '../store/apiSlice';
 import { Loader2, Trash2, User, AlertCircle, CheckCircle, X } from 'lucide-react';
 

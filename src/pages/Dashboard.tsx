@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import { useGetAllStoriesQuery, useRegenerateCoverImageMutation, useDeleteStoryMutation } from '../store/apiSlice';
 import { Loader2, BookOpen, PlusCircle, Eye, ChevronLeft, ChevronRight, Brain, RefreshCw, Trash2, X, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePreviewStoryQuery, useRegeneratePageIllustrationMutation } from '../store/apiSlice';
-import { Loader2, ChevronLeft, ChevronRight, ArrowDown, RefreshCw, Brain } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, RefreshCw, Brain } from 'lucide-react';
 
 export default function StoryPreview() {
   const { id } = useParams<{ id: string }>();
