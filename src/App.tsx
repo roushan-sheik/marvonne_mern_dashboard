@@ -12,6 +12,7 @@ import Orders from './pages/Orders';
 import CMS from './pages/CMS';
 import FollowUs from './pages/FollowUs';
 import Subscribers from './pages/Subscribers';
+import SeeTheMagicCMS from './pages/SeeTheMagicCMS';
 import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon, ShoppingCart, FileText, ChevronDown, HelpCircle, Share2, Mail } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
@@ -146,6 +147,20 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 >
                   <Share2 className="w-4 h-4 mr-2" />
                   Follow Us
+                </Link>
+                <div className="pt-2 pb-1">
+                  <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Home Page</p>
+                </div>
+                <Link
+                  to="/cms/see-the-magic"
+                  className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    location.pathname === '/cms/see-the-magic'
+                      ? 'bg-[#bef264] text-[#0a192f] shadow-[0_0_15px_rgba(190,242,100,0.4)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  See The Magic
                 </Link>
               </div>
             </div>
@@ -329,6 +344,16 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <FollowUs />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cms/see-the-magic"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <SeeTheMagicCMS />
             </AdminLayout>
           </ProtectedRoute>
         }

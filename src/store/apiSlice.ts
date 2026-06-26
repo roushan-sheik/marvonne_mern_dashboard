@@ -12,7 +12,7 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq', 'FollowUs', 'Subscriber'],
+  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq', 'FollowUs', 'Subscriber', 'SeeTheMagic'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -161,6 +161,18 @@ export const apiSlice = createApi({
       },
       providesTags: ['Subscriber'],
     }),
+    getSeeTheMagic: builder.query({
+      query: () => '/see-the-magic',
+      providesTags: ['SeeTheMagic'],
+    }),
+    updateSeeTheMagic: builder.mutation({
+      query: (data) => ({
+        url: '/see-the-magic',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['SeeTheMagic'],
+    }),
   }),
 });
 
@@ -187,4 +199,6 @@ export const {
   useGetFollowUsQuery,
   useUpdateFollowUsMutation,
   useGetSubscribersQuery,
+  useGetSeeTheMagicQuery,
+  useUpdateSeeTheMagicMutation,
 } = apiSlice;
