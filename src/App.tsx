@@ -7,7 +7,8 @@ import Dashboard from './pages/Dashboard';
 import CreateStory from './pages/CreateStory';
 import StoryPreview from './pages/StoryPreview';
 import Settings from './pages/Settings';
-import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon } from 'lucide-react';
+import Users from './pages/Users';
+import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
 import { Link, useLocation } from 'react-router-dom';
@@ -66,6 +67,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <PlusCircle className="w-5 h-5 mr-3" />
             Create Story
+          </Link>
+          <Link
+            to="/users"
+            className={`flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+              location.pathname === '/users'
+                ? 'bg-[#bef264] text-[#0a192f] shadow-[0_0_15px_rgba(190,242,100,0.4)]'
+                : 'text-gray-300 hover:bg-white/10 hover:text-white hover:translate-x-1'
+            }`}
+          >
+            <UsersIcon className="w-5 h-5 mr-3" />
+            Users
           </Link>
           <Link
             to="/settings"
@@ -131,6 +143,15 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="text-[10px] font-semibold">Create</span>
           </Link>
           <Link
+            to="/users"
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+              location.pathname === '/users' ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <UsersIcon className="w-5 h-5" />
+            <span className="text-[10px] font-semibold">Users</span>
+          </Link>
+          <Link
             to="/settings"
             className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
               location.pathname === '/settings' ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
@@ -165,6 +186,16 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <CreateStory />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <Users />
             </AdminLayout>
           </ProtectedRoute>
         }

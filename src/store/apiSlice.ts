@@ -12,7 +12,7 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Story', 'Auth'],
+  tagTypes: ['Story', 'Auth', 'Settings', 'User'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -26,6 +26,25 @@ export const apiSlice = createApi({
         url: '/auth/logout',
         method: 'POST',
       }),
+    }),
+    getAllUsers: builder.query({
+      query: () => '/users',
+      providesTags: ['User'],
+    }),
+    deleteUser: builder.mutation({
+      query: (userId) => ({
+        url: `/users/${userId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['User'],
+    }),
+    updateUserStatus: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/users/${id}/status`,
+        method: 'PATCH',
+        body: { status },
+      }),
+      invalidatesTags: ['User'],
     }),
     getAllStories: builder.query({
       query: ({ page = 1, limit = 9 } = {}) => `/story/all-stories?page=${page}&limit=${limit}`,
@@ -85,6 +104,9 @@ export const apiSlice = createApi({
 export const {
   useLoginMutation,
   useLogoutMutation,
+  useGetAllUsersQuery,
+  useDeleteUserMutation,
+  useUpdateUserStatusMutation,
   useGetAllStoriesQuery,
   usePreviewStoryQuery,
   useCreateStoryMutation,
