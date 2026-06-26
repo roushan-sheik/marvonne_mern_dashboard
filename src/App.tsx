@@ -8,7 +8,8 @@ import CreateStory from './pages/CreateStory';
 import StoryPreview from './pages/StoryPreview';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
-import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon } from 'lucide-react';
+import Orders from './pages/Orders';
+import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon, ShoppingCart } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
 import { Link, useLocation } from 'react-router-dom';
@@ -78,6 +79,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <UsersIcon className="w-5 h-5 mr-3" />
             Users
+          </Link>
+          <Link
+            to="/orders"
+            className={`flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+              location.pathname === '/orders'
+                ? 'bg-[#bef264] text-[#0a192f] shadow-[0_0_15px_rgba(190,242,100,0.4)]'
+                : 'text-gray-300 hover:bg-white/10 hover:text-white hover:translate-x-1'
+            }`}
+          >
+            <ShoppingCart className="w-5 h-5 mr-3" />
+            Orders
           </Link>
           <Link
             to="/settings"
@@ -152,6 +164,15 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="text-[10px] font-semibold">Users</span>
           </Link>
           <Link
+            to="/orders"
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+              location.pathname === '/orders' ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <ShoppingCart className="w-5 h-5" />
+            <span className="text-[10px] font-semibold">Orders</span>
+          </Link>
+          <Link
             to="/settings"
             className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
               location.pathname === '/settings' ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
@@ -196,6 +217,16 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <Users />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <Orders />
             </AdminLayout>
           </ProtectedRoute>
         }

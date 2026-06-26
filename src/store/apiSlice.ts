@@ -12,7 +12,7 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Story', 'Auth', 'Settings', 'User'],
+  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -99,6 +99,10 @@ export const apiSlice = createApi({
     getStoryStatus: builder.query({
       query: (id) => `/story/status/${id}`,
     }),
+    getAllOrders: builder.query({
+      query: () => '/orders/admin/all',
+      providesTags: ['Order'],
+    }),
   }),
 });
 
@@ -117,4 +121,5 @@ export const {
   useGetSettingsQuery,
   useUpdateSettingsMutation,
   useGetStoryStatusQuery,
+  useGetAllOrdersQuery,
 } = apiSlice;
