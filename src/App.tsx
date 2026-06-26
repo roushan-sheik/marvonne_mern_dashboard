@@ -10,7 +10,8 @@ import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Orders from './pages/Orders';
 import CMS from './pages/CMS';
-import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon, ShoppingCart, FileText, ChevronDown, HelpCircle } from 'lucide-react';
+import FollowUs from './pages/FollowUs';
+import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon, ShoppingCart, FileText, ChevronDown, HelpCircle, Share2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
 import { Link, useLocation } from 'react-router-dom';
@@ -122,6 +123,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 >
                   <HelpCircle className="w-4 h-4 mr-2" />
                   FAQ Page
+                </Link>
+                <Link
+                  to="/cms/follow-us"
+                  className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    location.pathname === '/cms/follow-us'
+                      ? 'bg-[#bef264] text-[#0a192f] shadow-[0_0_15px_rgba(190,242,100,0.4)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Follow Us
                 </Link>
               </div>
             </div>
@@ -295,6 +307,16 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <CMS />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cms/follow-us"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <FollowUs />
             </AdminLayout>
           </ProtectedRoute>
         }

@@ -12,7 +12,7 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq'],
+  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq', 'FollowUs'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -142,6 +142,18 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['Faq'],
     }),
+    getFollowUs: builder.query({
+      query: () => '/follow-us',
+      providesTags: ['FollowUs'],
+    }),
+    updateFollowUs: builder.mutation({
+      query: (data) => ({
+        url: '/follow-us',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['FollowUs'],
+    }),
   }),
 });
 
@@ -165,4 +177,6 @@ export const {
   useCreateFaqMutation,
   useUpdateFaqMutation,
   useDeleteFaqMutation,
+  useGetFollowUsQuery,
+  useUpdateFollowUsMutation,
 } = apiSlice;
