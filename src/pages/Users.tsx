@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGetAllUsersQuery, useDeleteUserMutation, useUpdateUserStatusMutation } from '../store/apiSlice';
-import { Loader2, Trash2, User, AlertCircle } from 'lucide-react';
+import { Loader2, Trash2, User, AlertCircle, CheckCircle, X } from 'lucide-react';
 
 export default function Users() {
   const { data, isLoading, error } = useGetAllUsersQuery({});
@@ -8,6 +8,8 @@ export default function Users() {
   const [updateUserStatus, { isLoading: isUpdatingStatus }] = useUpdateUserStatusMutation();
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [userToToggleStatus, setUserToToggleStatus] = useState<any>(null);
+  const [toastMsg, setToastMsg] = useState('');
 
   const users = data?.data || [];
 
@@ -20,22 +22,30 @@ export default function Users() {
     try {
       await deleteUser(userToDelete).unwrap();
       setUserToDelete(null);
-      alert('User deleted successfully');
+      setToastMsg('User deleted successfully');
+      setTimeout(() => setToastMsg(''), 4000);
     } catch (err: any) {
       alert(err?.data?.message || err?.message || 'Failed to delete user');
       setUserToDelete(null);
     }
   };
 
-  const handleToggleStatus = async (user: any) => {
-    const newStatus = user.status === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE';
-    setUpdatingUserId(user.id);
+  const handleToggleStatusClick = (user: any) => {
+    setUserToToggleStatus(user);
+  };
+
+  const confirmToggleStatus = async () => {
+    if (!userToToggleStatus) return;
+    const newStatus = userToToggleStatus.status === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE';
+    setUpdatingUserId(userToToggleStatus.id);
     try {
-      await updateUserStatus({ id: user.id, status: newStatus }).unwrap();
-      alert(`User has been ${newStatus.toLowerCase()} successfully`);
+      await updateUserStatus({ id: userToToggleStatus.id, status: newStatus }).unwrap();
+      setToastMsg(`User has been ${newStatus.toLowerCase()} successfully`);
+      setTimeout(() => setToastMsg(''), 4000);
     } catch (err: any) {
       alert(err?.data?.message || err?.message || 'Failed to update user status');
     } finally {
+      setUserToToggleStatus(null);
       setUpdatingUserId(null);
     }
   };
@@ -104,7 +114,7 @@ export default function Users() {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => handleToggleStatus(user)}
+                      onClick={() => handleToggleStatusClick(user)}
                       disabled={isUpdatingStatus && updatingUserId === user.id}
                       className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-bold rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                         user.status === 'ACTIVE'
@@ -166,6 +176,46 @@ export default function Users() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      {/* Status Toggle Confirmation Modal */}
+      {userToToggleStatus && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl scale-100 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-2xl font-extrabold text-[#0a192f] mb-2">
+              {userToToggleStatus.status === 'ACTIVE' ? 'Block User?' : 'Unblock User?'}
+            </h3>
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              Are you sure you want to {userToToggleStatus.status === 'ACTIVE' ? 'block' : 'unblock'} <span className="font-bold text-gray-900">"{userToToggleStatus.name}"</span>?
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setUserToToggleStatus(null)}
+                disabled={isUpdatingStatus}
+                className="flex-1 px-4 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmToggleStatus}
+                disabled={isUpdatingStatus}
+                className={`flex-1 px-4 py-3 text-sm font-bold text-white rounded-xl transition-colors flex items-center justify-center disabled:opacity-50 shadow-md ${userToToggleStatus.status === 'ACTIVE' ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' : 'bg-green-500 hover:bg-green-600 shadow-green-500/20'}`}
+              >
+                {isUpdatingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : (userToToggleStatus.status === 'ACTIVE' ? 'Block' : 'Unblock')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center bg-[#0a192f] text-white px-5 py-3.5 rounded-2xl shadow-xl animate-in slide-in-from-bottom-5">
+          <CheckCircle className="w-5 h-5 text-[#bef264] mr-3" />
+          <p className="text-sm font-medium">{toastMsg}</p>
+          <button onClick={() => setToastMsg('')} className="ml-4 text-gray-400 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>
