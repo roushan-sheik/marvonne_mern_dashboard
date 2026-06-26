@@ -12,7 +12,7 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq', 'FollowUs', 'Subscriber', 'SeeTheMagic'],
+  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq', 'FollowUs', 'Subscriber', 'SeeTheMagic', 'HeroCms'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -173,6 +173,18 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['SeeTheMagic'],
     }),
+    getHeroCms: builder.query({
+      query: () => '/hero-cms',
+      providesTags: ['HeroCms'],
+    }),
+    updateHeroCms: builder.mutation({
+      query: (data) => ({
+        url: '/hero-cms',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['HeroCms'],
+    }),
   }),
 });
 
@@ -201,4 +213,6 @@ export const {
   useGetSubscribersQuery,
   useGetSeeTheMagicQuery,
   useUpdateSeeTheMagicMutation,
+  useGetHeroCmsQuery,
+  useUpdateHeroCmsMutation,
 } = apiSlice;

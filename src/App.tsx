@@ -13,6 +13,7 @@ import CMS from './pages/CMS';
 import FollowUs from './pages/FollowUs';
 import Subscribers from './pages/Subscribers';
 import SeeTheMagicCMS from './pages/SeeTheMagicCMS';
+import HeroCMS from './pages/HeroCMS';
 import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon, ShoppingCart, FileText, ChevronDown, HelpCircle, Share2, Mail } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
@@ -124,7 +125,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             </button>
             
             {/* Sub-menu */}
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isCmsOpen ? 'max-h-40 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isCmsOpen ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
               <div className="pl-11 pr-4 space-y-1">
                 <Link
                   to="/cms/faq"
@@ -151,6 +152,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 <div className="pt-2 pb-1">
                   <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Home Page</p>
                 </div>
+                <Link
+                  to="/cms/hero"
+                  className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    location.pathname === '/cms/hero'
+                      ? 'bg-[#bef264] text-[#0a192f] shadow-[0_0_15px_rgba(190,242,100,0.4)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Hero Section
+                </Link>
                 <Link
                   to="/cms/see-the-magic"
                   className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
@@ -354,6 +366,16 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <SeeTheMagicCMS />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cms/hero"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <HeroCMS />
             </AdminLayout>
           </ProtectedRoute>
         }
