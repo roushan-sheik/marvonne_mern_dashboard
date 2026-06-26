@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useGetAllOrdersQuery } from '../store/apiSlice';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface OrderItem {
@@ -25,8 +26,11 @@ interface Order {
 }
 
 const Orders = () => {
-  const { data: response, isLoading, isError } = useGetAllOrdersQuery({});
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: response, isLoading, isError, isFetching } = useGetAllOrdersQuery({ page, limit });
   const orders: Order[] = response?.data || [];
+  const meta = response?.meta;
 
   if (isLoading) {
     return (
@@ -127,6 +131,29 @@ const Orders = () => {
               )}
             </tbody>
           </table>
+          {meta && meta.total > meta.limit && (
+            <div className="flex justify-center items-center p-6 border-t border-gray-100 bg-white space-x-4 rounded-b-xl">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1 || isFetching}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </button>
+              <span className="text-sm font-medium text-gray-500">
+                Page {meta.page} of {Math.ceil(meta.total / meta.limit)}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(Math.ceil(meta.total / meta.limit), p + 1))}
+                disabled={page >= Math.ceil(meta.total / meta.limit) || isFetching}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

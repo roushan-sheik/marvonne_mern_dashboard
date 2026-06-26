@@ -111,17 +111,17 @@ export default function CreateStory() {
       <div className="flex-1 flex flex-col max-w-2xl w-full mx-auto overflow-hidden relative z-10">
 
         {/* Header - Compact */}
-        <div className="shrink-0 flex items-center justify-between mb-6 bg-white/60 backdrop-blur-md p-4 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-white">
-          <div className="flex items-center">
-            <Link to="/" className="mr-4 p-2.5 bg-white text-gray-500 hover:text-indigo-600 shadow-sm hover:shadow rounded-full transition-all border border-gray-100">
-              <ArrowLeft className="w-4 h-4" />
+        <div className="shrink-0 flex items-center justify-between mb-6 bg-gradient-to-r from-[#0a192f] to-[#0f3a4a] p-6 sm:p-8 rounded-3xl shadow-xl">
+          <div className="flex items-center space-x-4">
+            <Link to="/" className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all border border-white/20 backdrop-blur-md">
+              <ArrowLeft className="w-6 h-6" />
             </Link>
+            <div className="bg-[#bef264]/20 p-3 rounded-2xl">
+              <Wand2 className="w-8 h-8 text-[#bef264]" />
+            </div>
             <div>
-              <h1 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
-                <Wand2 className="w-5 h-5 text-indigo-600 mr-2" />
-                Generate Magic Story
-              </h1>
-              <p className="text-gray-500 text-xs mt-0.5">Let AI craft a beautiful children's book.</p>
+              <h1 className="text-3xl font-extrabold text-white tracking-tight">Generate Magic Story</h1>
+              <p className="text-[#bef264] font-medium mt-1">Let AI craft a beautiful children's book</p>
             </div>
           </div>
         </div>

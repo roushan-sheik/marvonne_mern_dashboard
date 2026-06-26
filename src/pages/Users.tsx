@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { useGetAllUsersQuery, useDeleteUserMutation, useUpdateUserStatusMutation } from '../store/apiSlice';
-import { Loader2, Trash2, User, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { Loader2, Trash2, User, AlertCircle, CheckCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Users() {
-  const { data, isLoading, error } = useGetAllUsersQuery({});
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: response, isLoading, error, isFetching } = useGetAllUsersQuery({ page, limit });
+  const data = response?.data || [];
+  const meta = response?.meta;
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
   const [updateUserStatus, { isLoading: isUpdatingStatus }] = useUpdateUserStatusMutation();
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
@@ -11,7 +15,7 @@ export default function Users() {
   const [userToToggleStatus, setUserToToggleStatus] = useState<any>(null);
   const [toastMsg, setToastMsg] = useState('');
 
-  const users = data?.data || [];
+  const users = data || [];
 
   const handleDeleteClick = (id: string) => {
     setUserToDelete(id);
@@ -68,16 +72,21 @@ export default function Users() {
   }
 
   return (
-    <div className="w-full">
-      <div className="mb-8">
-        <h1 className="text-4xl font-extrabold text-[#0a192f] tracking-tight drop-shadow-sm mb-2">
-          User Management
-        </h1>
-        <p className="text-gray-600 text-lg">Manage all registered users and their details.</p>
+    <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+      <div className="bg-gradient-to-r from-[#0a192f] to-[#0f3a4a] p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between">
+        <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+          <div className="bg-[#bef264]/20 p-3 rounded-2xl">
+            <User className="w-8 h-8 text-[#bef264]" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">User Management</h1>
+            <p className="text-[#bef264] font-medium mt-1">Manage all registered users and their details</p>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="p-6 sm:p-10">
+        <div className="overflow-x-auto rounded-xl border border-gray-100">
           <table className="w-full whitespace-nowrap">
             <thead className="bg-[#f8fafc] border-b border-gray-100 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
               <tr>
@@ -148,6 +157,29 @@ export default function Users() {
               )}
             </tbody>
           </table>
+          {meta && meta.total > meta.limit && (
+            <div className="flex justify-center items-center p-6 border-t border-gray-100 bg-white space-x-4">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1 || isFetching}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </button>
+              <span className="text-sm font-medium text-gray-500">
+                Page {meta.page} of {Math.ceil(meta.total / meta.limit)}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(Math.ceil(meta.total / meta.limit), p + 1))}
+                disabled={page >= Math.ceil(meta.total / meta.limit) || isFetching}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

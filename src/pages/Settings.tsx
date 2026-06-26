@@ -58,13 +58,15 @@ export default function Settings() {
 
   return (
     <div className="mx-auto max-w-4xl p-4 md:p-8">
-      <div className="mb-8 flex items-center">
-        <div className="mr-4 rounded-xl bg-indigo-100 p-3">
-          <SettingsIcon className="h-6 w-6 text-indigo-600" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
-          <p className="text-sm text-gray-500">Configure global parameters for AI generation and platform limits.</p>
+      <div className="bg-gradient-to-r from-[#0a192f] to-[#0f3a4a] p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between rounded-3xl shadow-xl mb-8">
+        <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+          <div className="bg-[#bef264]/20 p-3 rounded-2xl">
+            <SettingsIcon className="w-8 h-8 text-[#bef264]" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">System Settings</h1>
+            <p className="text-[#bef264] font-medium mt-1">Configure global parameters for AI generation and platform limits.</p>
+          </div>
         </div>
       </div>
 

@@ -28,7 +28,11 @@ export const apiSlice = createApi({
       }),
     }),
     getAllUsers: builder.query({
-      query: () => '/users',
+      query: (args: { page?: number; limit?: number } | void) => {
+        const page = args?.page || 1;
+        const limit = args?.limit || 10;
+        return `/users?page=${page}&limit=${limit}`;
+      },
       providesTags: ['User'],
     }),
     deleteUser: builder.mutation({
@@ -104,7 +108,11 @@ export const apiSlice = createApi({
       query: (id) => `/story/status/${id}`,
     }),
     getAllOrders: builder.query({
-      query: () => '/orders/admin/all',
+      query: (args: { page?: number; limit?: number } | void) => {
+        const page = args?.page || 1;
+        const limit = args?.limit || 10;
+        return `/orders/admin/all?page=${page}&limit=${limit}`;
+      },
       providesTags: ['Order'],
     }),
   }),

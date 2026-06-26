@@ -152,20 +152,27 @@ export default function Dashboard() {
   }
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Stories</h1>
-          <p className="text-gray-500 mt-1">Manage and view your generated stories.</p>
+    <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+      <div className="bg-gradient-to-r from-[#0a192f] to-[#0f3a4a] p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between">
+        <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+          <div className="bg-[#bef264]/20 p-3 rounded-2xl">
+            <BookOpen className="w-8 h-8 text-[#bef264]" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Story Management</h1>
+            <p className="text-[#bef264] font-medium mt-1">Manage and view your generated stories</p>
+          </div>
         </div>
         <Link
           to="/create"
-          className="flex items-center justify-center w-full sm:w-auto px-5 py-2.5 bg-[#bef264] text-[#0a192f] font-bold rounded-full hover:bg-[#bef264]-hover transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 duration-200"
+          className="flex items-center justify-center w-full sm:w-auto px-5 py-2.5 bg-[#bef264] text-[#0a192f] font-bold rounded-full hover:bg-[#bef264]/90 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 duration-200"
         >
           <PlusCircle className="w-5 h-5 mr-2" />
           Create New Story
         </Link>
       </div>
+
+      <div className="p-6 sm:p-10">
 
       {stories.length === 0 ? (
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center">
@@ -223,6 +230,7 @@ export default function Dashboard() {
           )}
         </>
       )}
+      </div>
 
       {/* Delete Confirmation Modal */}
       {storyToDelete && (
