@@ -70,9 +70,10 @@ export const apiSlice = createApi({
       invalidatesTags: ['Story'],
     }),
     regenerateCoverImage: builder.mutation({
-      query: (storyId) => ({
+      query: ({ storyId, customPrompt }) => ({
         url: `/story/update-story/${storyId}/regenerate-cover`,
         method: 'PUT',
+        body: { customPrompt },
       }),
       invalidatesTags: ['Story'],
     }),

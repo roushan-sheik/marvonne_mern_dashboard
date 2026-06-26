@@ -3,19 +3,13 @@ import { useGetAllStoriesQuery, useRegenerateCoverImageMutation, useDeleteStoryM
 import { Loader2, BookOpen, PlusCircle, Eye, ChevronLeft, ChevronRight, Brain, RefreshCw, Trash2, X, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-function StoryCard({ story, onDeleteClick, isDeleting }: { story: any, onDeleteClick: (story: any) => void, isDeleting: boolean }) {
-  const [regenerateCoverImage, { isLoading: isRegenerating }] = useRegenerateCoverImageMutation();
-
-  const handleRegenerateCover = async () => {
-    try {
-      await regenerateCoverImage(story.id).unwrap();
-    } catch (err: any) {
-      alert(err?.data?.message || err?.message || 'Failed to regenerate cover image');
-    }
-  };
-
+function StoryCard({ story, onDeleteClick, onUpdateCoverClick, isDeleting, isRegenerating }: { story: any, onDeleteClick: (story: any) => void, onUpdateCoverClick: (story: any) => void, isDeleting: boolean, isRegenerating: boolean }) {
   const handleDeleteStory = () => {
     onDeleteClick(story);
+  };
+
+  const handleUpdateCoverClick = () => {
+    onUpdateCoverClick(story);
   };
 
   return (
@@ -56,7 +50,7 @@ function StoryCard({ story, onDeleteClick, isDeleting }: { story: any, onDeleteC
             <button
               onClick={(e) => {
                 e.preventDefault();
-                handleRegenerateCover();
+                handleUpdateCoverClick();
               }}
               className="flex items-center px-3 py-1.5 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-bold rounded-full transition-all shadow-lg"
             >
@@ -105,8 +99,11 @@ export default function Dashboard() {
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, isFetching } = useGetAllStoriesQuery({ page, limit: 9 });
   const [deleteStory, { isLoading: isDeletingStory }] = useDeleteStoryMutation();
+  const [regenerateCoverImage, { isLoading: isRegeneratingCover }] = useRegenerateCoverImageMutation();
   
   const [storyToDelete, setStoryToDelete] = useState<any>(null);
+  const [storyToUpdateCover, setStoryToUpdateCover] = useState<any>(null);
+  const [customPrompt, setCustomPrompt] = useState('');
   const [toastMsg, setToastMsg] = useState('');
 
   const stories = data?.data || [];
@@ -122,6 +119,19 @@ export default function Dashboard() {
       alert(err?.data?.message || err?.message || 'Failed to delete story');
     } finally {
       setStoryToDelete(null);
+    }
+  };
+
+  const confirmUpdateCover = async () => {
+    if (!storyToUpdateCover) return;
+    try {
+      await regenerateCoverImage({ storyId: storyToUpdateCover.id, customPrompt }).unwrap();
+      setToastMsg(`Cover for "${storyToUpdateCover.title}" is being generated!`);
+      setTimeout(() => setToastMsg(''), 4000);
+      setStoryToUpdateCover(null);
+      setCustomPrompt('');
+    } catch (err: any) {
+      alert(err?.data?.message || err?.message || 'Failed to regenerate cover image');
     }
   };
 
@@ -180,7 +190,9 @@ export default function Dashboard() {
                 key={story.id} 
                 story={story} 
                 onDeleteClick={setStoryToDelete} 
+                onUpdateCoverClick={setStoryToUpdateCover}
                 isDeleting={isDeletingStory && storyToDelete?.id === story.id} 
+                isRegenerating={isRegeneratingCover && storyToUpdateCover?.id === story.id}
               />
             ))}
           </div>
@@ -235,6 +247,48 @@ export default function Dashboard() {
               >
                 {isDeletingStory ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
                 Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Cover Modal */}
+      {storyToUpdateCover && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-[#0a192f] mb-2">Regenerate Cover Image</h3>
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+              Provide custom instructions for the AI to guide the new cover generation for <span className="font-bold text-gray-900">"{storyToUpdateCover.title}"</span>. Leave blank to let the AI decide.
+            </p>
+            
+            <textarea
+              className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0d9488] focus:border-[#0d9488] block p-4 mb-6 resize-none shadow-inner"
+              rows={4}
+              placeholder="e.g. 'A magical forest at night with glowing mushrooms, watercolor style...'"
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              disabled={isRegeneratingCover}
+            />
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setStoryToUpdateCover(null);
+                  setCustomPrompt('');
+                }}
+                className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                disabled={isRegeneratingCover}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmUpdateCover}
+                className="flex items-center px-5 py-2.5 bg-[#0d9488] text-white text-sm font-bold rounded-xl hover:bg-[#0f3a4a] transition-colors disabled:opacity-50 shadow-md"
+                disabled={isRegeneratingCover}
+              >
+                {isRegeneratingCover ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Brain className="w-4 h-4 mr-2" />}
+                Generate Cover
               </button>
             </div>
           </div>
