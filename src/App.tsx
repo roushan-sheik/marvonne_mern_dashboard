@@ -9,7 +9,8 @@ import StoryPreview from './pages/StoryPreview';
 import Settings from './pages/Settings';
 import Users from './pages/Users';
 import Orders from './pages/Orders';
-import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon, ShoppingCart } from 'lucide-react';
+import CMS from './pages/CMS';
+import { LogOut, BookOpen, PlusCircle, Settings as SettingsIcon, Users as UsersIcon, ShoppingCart, FileText, ChevronDown, HelpCircle } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
 import { Link, useLocation } from 'react-router-dom';
@@ -28,6 +29,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const [logoutApi] = useLogoutMutation();
+  const [isCmsOpen, setIsCmsOpen] = React.useState(location.pathname.startsWith('/cms'));
 
   const handleLogout = async () => {
     try {
@@ -91,6 +93,39 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <ShoppingCart className="w-5 h-5 mr-3" />
             Orders
           </Link>
+          <div className="space-y-1">
+            <button
+              onClick={() => setIsCmsOpen(!isCmsOpen)}
+              className={`w-full flex items-center justify-between px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                location.pathname.startsWith('/cms')
+                  ? 'bg-[#bef264]/10 text-[#bef264]'
+                  : 'text-gray-300 hover:bg-white/10 hover:text-white hover:translate-x-1'
+              }`}
+            >
+              <div className="flex items-center">
+                <FileText className="w-5 h-5 mr-3" />
+                CMS
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCmsOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {/* Sub-menu */}
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isCmsOpen ? 'max-h-40 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+              <div className="pl-11 pr-4 space-y-1">
+                <Link
+                  to="/cms/faq"
+                  className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    location.pathname === '/cms/faq'
+                      ? 'bg-[#bef264] text-[#0a192f] shadow-[0_0_15px_rgba(190,242,100,0.4)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <HelpCircle className="w-4 h-4 mr-2" />
+                  FAQ Page
+                </Link>
+              </div>
+            </div>
+          </div>
           <Link
             to="/settings"
             className={`flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
@@ -173,6 +208,15 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="text-[10px] font-semibold">Orders</span>
           </Link>
           <Link
+            to="/cms/faq"
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+              location.pathname.startsWith('/cms') ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            <span className="text-[10px] font-semibold">CMS</span>
+          </Link>
+          <Link
             to="/settings"
             className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
               location.pathname === '/settings' ? 'text-[#bef264]' : 'text-gray-400 hover:text-white'
@@ -237,6 +281,20 @@ function App() {
           <ProtectedRoute>
             <AdminLayout>
               <Settings />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cms"
+        element={<Navigate to="/cms/faq" replace />}
+      />
+      <Route
+        path="/cms/faq"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <CMS />
             </AdminLayout>
           </ProtectedRoute>
         }

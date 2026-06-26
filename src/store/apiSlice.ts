@@ -12,7 +12,7 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order'],
+  tagTypes: ['Story', 'Auth', 'Settings', 'User', 'Order', 'Faq'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -115,6 +115,33 @@ export const apiSlice = createApi({
       },
       providesTags: ['Order'],
     }),
+    getAllFaqs: builder.query({
+      query: () => '/faqs/all-faqs',
+      providesTags: ['Faq'],
+    }),
+    createFaq: builder.mutation({
+      query: (data) => ({
+        url: '/faqs/create-faq',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Faq'],
+    }),
+    updateFaq: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/faqs/update-faq/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Faq'],
+    }),
+    deleteFaq: builder.mutation({
+      query: (id) => ({
+        url: `/faqs/delete-faq/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Faq'],
+    }),
   }),
 });
 
@@ -134,4 +161,8 @@ export const {
   useUpdateSettingsMutation,
   useGetStoryStatusQuery,
   useGetAllOrdersQuery,
+  useGetAllFaqsQuery,
+  useCreateFaqMutation,
+  useUpdateFaqMutation,
+  useDeleteFaqMutation,
 } = apiSlice;
