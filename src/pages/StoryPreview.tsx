@@ -39,7 +39,7 @@ export default function StoryPreview() {
 
   const pages = story.pages;
   const currentPage = pages[currentPageIndex];
-  
+
   // Use a fallback image if individual page images aren't available yet
   const pageImage = currentPage.default_image || story.cover_image || "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=1000";
 
@@ -86,7 +86,7 @@ export default function StoryPreview() {
 
   return (
     <div className="h-[calc(100vh-64px)] md:h-screen -m-6 md:-m-10 p-4 md:p-6 bg-gradient-to-br from-[#e8f7ec] via-[#f0fdf4] to-[#ccfbf1] font-sans flex flex-col items-center overflow-hidden relative">
-      
+
       {/* Title Area */}
       <div className="shrink-0 text-center mb-2 md:mb-4 mt-2">
         <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Preview Your Story</h1>
@@ -94,9 +94,9 @@ export default function StoryPreview() {
 
       {/* Main Book Spread - Flex-1 to fill available vertical space */}
       <div className="relative w-full max-w-6xl flex-1 min-h-0 flex items-center justify-center mb-2 md:mb-6">
-        
+
         {/* Navigation Buttons (Left / Right) */}
-        <button 
+        <button
           onClick={handlePrev}
           disabled={currentPageIndex === 0}
           className="absolute left-0 md:-left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-[#34d399] to-[#0d9488] text-white shadow-lg hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
@@ -104,7 +104,7 @@ export default function StoryPreview() {
           <ChevronLeft className="w-6 h-6 md:w-10 md:h-10 ml-[-2px]" />
         </button>
 
-        <button 
+        <button
           onClick={handleNext}
           disabled={currentPageIndex === pages.length - 1}
           className="absolute right-0 md:-right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-[#34d399] to-[#0d9488] text-white shadow-lg hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
@@ -114,19 +114,19 @@ export default function StoryPreview() {
 
         {/* The Book Container */}
         <div className="flex flex-col md:flex-row bg-white rounded-lg shadow-2xl relative z-10 w-[90%] md:w-full h-full max-h-[600px] overflow-hidden ring-1 ring-black/5">
-          
+
           {/* Middle Crease Shadow */}
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-12 -ml-6 bg-gradient-to-r from-transparent via-black/10 to-transparent pointer-events-none z-20"></div>
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1px] bg-black/5 z-20"></div>
 
           {/* Left Page (Image) */}
           <div className="w-full md:w-1/2 h-[45%] md:h-full relative bg-gray-100 shrink-0 group">
-            <img 
-              src={pageImage} 
-              alt={`Page ${currentPage.page_number} illustration`} 
+            <img
+              src={pageImage}
+              alt={`Page ${currentPage.page_number} illustration`}
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isRegenerating ? 'opacity-40 blur-sm' : 'opacity-100'}`}
             />
-            
+
             {/* Loading Overlay */}
             {isRegenerating && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10 z-20">
@@ -152,11 +152,11 @@ export default function StoryPreview() {
 
           {/* Right Page (Text) */}
           <div className="w-full md:w-1/2 h-[55%] md:h-full p-6 md:p-12 relative flex flex-col justify-center bg-white overflow-hidden">
-            
+
             {/* Floral/Decorative Corners (Simulated with gradients) */}
             <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-gradient-to-bl from-pink-300/30 via-purple-300/20 to-transparent rounded-bl-full pointer-events-none z-0"></div>
             <div className="absolute bottom-0 left-0 w-40 h-40 md:w-64 md:h-64 bg-gradient-to-tr from-teal-300/20 via-blue-300/10 to-transparent rounded-tr-full pointer-events-none z-0"></div>
-            
+
             <div className="relative z-10 flex flex-col h-full">
               {/* Top Badge */}
               <div className="shrink-0">
@@ -178,7 +178,7 @@ export default function StoryPreview() {
               {/* Next Paragraph Button (Absolutely Positioned to avoid layout shift/overflow) */}
               {currentParaIndex < chunks.length - 1 && (
                 <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 z-20">
-                  <button 
+                  <button
                     onClick={handleNextPara}
                     className="flex items-center text-xs md:text-sm px-4 py-2 bg-gradient-to-r from-[#0d9488] to-[#0f3a4a] text-white font-bold rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
                   >
@@ -202,11 +202,10 @@ export default function StoryPreview() {
                 setCurrentPageIndex(index);
                 setCurrentParaIndex(0);
               }}
-              className={`relative flex-shrink-0 w-24 h-16 md:w-40 md:h-24 rounded bg-white shadow-md overflow-hidden transition-all snap-center group ${
-                currentPageIndex === index 
-                  ? 'ring-2 md:ring-4 ring-[#0d9488] ring-offset-2 scale-105 z-10' 
+              className={`relative flex-shrink-0 w-24 h-16 md:w-40 md:h-24 rounded bg-white shadow-md overflow-hidden transition-all snap-center group ${currentPageIndex === index
+                  ? 'ring-2 md:ring-4 ring-[#0d9488] ring-offset-2 scale-105 z-10'
                   : 'hover:ring-2 hover:ring-[#34d399] opacity-70 hover:opacity-100'
-              }`}
+                }`}
             >
               <div className="absolute inset-0 p-1.5 md:p-3 flex flex-col">
                 <div className="inline-block px-1.5 py-0.5 bg-gradient-to-r from-[#bef264] to-[#4ade80] text-[6px] md:text-[9px] text-teal-900 rounded-full font-bold w-max mb-1">
@@ -226,7 +225,7 @@ export default function StoryPreview() {
         <div className="flex items-center gap-2 md:gap-3">
           <div className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${currentPageIndex === 0 ? 'bg-[#0d9488]' : 'bg-gray-300'}`}></div>
           <p className="text-[#0f3a4a] text-xs md:text-sm font-bold tracking-wide mx-2">
-             {currentPageIndex + 1} of {pages.length}
+            {currentPageIndex + 1} of {pages.length}
           </p>
           <div className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${currentPageIndex === pages.length - 1 ? 'bg-[#0d9488]' : 'bg-gray-300'}`}></div>
         </div>
