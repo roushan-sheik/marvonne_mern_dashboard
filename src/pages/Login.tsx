@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useLoginMutation } from '../store/apiSlice';
 import { setCredentials } from '../store/authSlice';
-import { BookOpen, Loader2 } from 'lucide-react';
+import { BookOpen, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
 const loginSchema = z.object({
@@ -20,6 +20,7 @@ export default function Login() {
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
   const [errorMsg, setErrorMsg] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -92,14 +93,25 @@ export default function Login() {
               >
                 Password
               </label>
-              <div className="mt-2">
+              <div className="mt-2 relative">
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   {...register('password')}
-                  className="appearance-none block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl shadow-sm placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-[#bef264] focus:border-transparent sm:text-base transition-all"
+                  className="appearance-none block w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl shadow-sm placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-[#bef264] focus:border-transparent sm:text-base transition-all pr-12"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-[#bef264] focus:outline-none transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
                 {errors.password && (
                   <p className="mt-2 text-sm text-red-400 font-medium">
                     {errors.password.message}
