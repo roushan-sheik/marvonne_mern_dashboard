@@ -22,6 +22,7 @@ interface Order {
   items?: OrderItem[];
   total_amount?: number;
   status: string;
+  fulfillment_status?: string | null;
   created_at: string;
 }
 
@@ -153,17 +154,24 @@ const Orders = () => {
                       ${order.total_amount?.toFixed(2)}
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          order.status === 'COMPLETED'
-                            ? 'bg-green-100 text-green-700'
-                            : order.status === 'PENDING_PAYMENT'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {order.status}
-                      </span>
+                      <div className="flex flex-col gap-2">
+                        <span
+                          className={`w-fit px-3 py-1 rounded-full text-xs font-bold ${
+                            order.status === 'COMPLETED'
+                              ? 'bg-green-100 text-green-700'
+                              : order.status === 'PENDING_PAYMENT'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {order.status}
+                        </span>
+                        {order.fulfillment_status && (
+                          <span className="w-fit px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 uppercase">
+                            {order.fulfillment_status.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-gray-500 font-medium whitespace-nowrap">
                       {format(new Date(order.created_at), 'MMM dd, yyyy HH:mm')}
