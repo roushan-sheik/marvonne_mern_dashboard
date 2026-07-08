@@ -115,6 +115,10 @@ export const apiSlice = createApi({
       },
       providesTags: ['Order'],
     }),
+    getGelatoStats: builder.query({
+      query: () => '/orders/admin/gelato-stats',
+      providesTags: ['Order'],
+    }),
     getAllFaqs: builder.query({
       query: () => '/faqs/all-faqs',
       providesTags: ['Faq'],
@@ -215,4 +219,5 @@ export const {
   useUpdateSeeTheMagicMutation,
   useGetHeroCmsQuery,
   useUpdateHeroCmsMutation,
+  useGetGelatoStatsQuery,
 } = apiSlice;

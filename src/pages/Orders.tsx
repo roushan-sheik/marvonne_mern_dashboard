@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useGetAllOrdersQuery } from '../store/apiSlice';
-import { ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useGetAllOrdersQuery, useGetGelatoStatsQuery } from '../store/apiSlice';
+import { ShoppingCart, ChevronLeft, ChevronRight, Printer, Package, Truck, CheckCircle, PackageOpen } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface OrderItem {
@@ -29,8 +29,10 @@ const Orders = () => {
   const [page, setPage] = useState(1);
   const limit = 10;
   const { data: response, isLoading, isError, isFetching } = useGetAllOrdersQuery({ page, limit });
+  const { data: statsResponse } = useGetGelatoStatsQuery(undefined);
   const orders: Order[] = response?.data || [];
   const meta = response?.meta;
+  const stats = statsResponse?.data;
 
   if (isLoading) {
     return (
@@ -61,6 +63,46 @@ const Orders = () => {
           </div>
         </div>
       </div>
+
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 px-6 sm:px-10 pt-6">
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center space-x-3">
+            <div className="bg-blue-50 p-2 rounded-lg"><Printer className="w-5 h-5 text-blue-500" /></div>
+            <div>
+              <p className="text-xs text-gray-500 font-semibold uppercase">Total Printed</p>
+              <p className="text-lg font-bold text-gray-900">{stats.total || 0}</p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center space-x-3">
+            <div className="bg-yellow-50 p-2 rounded-lg"><PackageOpen className="w-5 h-5 text-yellow-500" /></div>
+            <div>
+              <p className="text-xs text-gray-500 font-semibold uppercase">In Production</p>
+              <p className="text-lg font-bold text-gray-900">{stats.inProduction || 0}</p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center space-x-3">
+            <div className="bg-purple-50 p-2 rounded-lg"><Package className="w-5 h-5 text-purple-500" /></div>
+            <div>
+              <p className="text-xs text-gray-500 font-semibold uppercase">Printed</p>
+              <p className="text-lg font-bold text-gray-900">{stats.printed || 0}</p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center space-x-3">
+            <div className="bg-orange-50 p-2 rounded-lg"><Truck className="w-5 h-5 text-orange-500" /></div>
+            <div>
+              <p className="text-xs text-gray-500 font-semibold uppercase">Shipped</p>
+              <p className="text-lg font-bold text-gray-900">{stats.shipped || 0}</p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center space-x-3">
+            <div className="bg-green-50 p-2 rounded-lg"><CheckCircle className="w-5 h-5 text-green-500" /></div>
+            <div>
+              <p className="text-xs text-gray-500 font-semibold uppercase">Delivered</p>
+              <p className="text-lg font-bold text-gray-900">{stats.delivered || 0}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="p-6 sm:p-10">
         <div className="overflow-x-auto rounded-xl border border-gray-100">
