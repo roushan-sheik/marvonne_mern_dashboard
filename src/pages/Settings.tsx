@@ -11,6 +11,7 @@ const settingsSchema = z.object({
   max_pages: z.number().min(1, 'Maximum pages must be at least 1'),
   digital_price_per_page: z.number().min(0, 'Price cannot be negative'),
   printed_price_per_page: z.number().min(0, 'Price cannot be negative'),
+  hardcover_price_per_page: z.number().min(0, 'Price cannot be negative'),
 }).refine(data => data.min_words_per_page <= data.max_words_per_page, {
   message: "Min words cannot be greater than max words",
   path: ["min_words_per_page"]
@@ -40,6 +41,7 @@ export default function Settings() {
         max_pages: settingsResponse.data.max_pages,
         digital_price_per_page: settingsResponse.data.digital_price_per_page ?? 0.50,
         printed_price_per_page: settingsResponse.data.printed_price_per_page ?? 1.00,
+        hardcover_price_per_page: settingsResponse.data.hardcover_price_per_page ?? 1.50,
       });
     }
   }, [settingsResponse, reset]);
@@ -182,6 +184,24 @@ export default function Settings() {
                 </div>
                 {errors.printed_price_per_page && (
                   <p className="mt-1 text-xs font-medium text-red-500">{errors.printed_price_per_page.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm text-gray-700">Hardcover Book Price ($)</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500 sm:text-sm">$</span>
+                  </div>
+                  <input
+                    type="number"
+                    step="0.01"
+                    {...register('hardcover_price_per_page', { valueAsNumber: true })}
+                    className="w-full rounded-lg border border-gray-200 pl-7 pr-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                {errors.hardcover_price_per_page && (
+                  <p className="mt-1 text-xs font-medium text-red-500">{errors.hardcover_price_per_page.message}</p>
                 )}
               </div>
             </div>
