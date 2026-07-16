@@ -69,7 +69,7 @@ export default function FollowUs() {
               </label>
               <input
                 {...register('facebook_url', { 
-                  pattern: { value: /^https?:\/\/.*/, message: 'Must be a valid URL' } 
+                  pattern: { value: /^(https?:\/\/.*)?$/, message: 'Must be a valid URL' } 
                 })}
                 placeholder="https://facebook.com/yourpage"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0a192f] focus:border-transparent outline-none transition-all"
@@ -85,7 +85,7 @@ export default function FollowUs() {
               </label>
               <input
                 {...register('instagram_url', { 
-                  pattern: { value: /^https?:\/\/.*/, message: 'Must be a valid URL' } 
+                  pattern: { value: /^(https?:\/\/.*)?$/, message: 'Must be a valid URL' } 
                 })}
                 placeholder="https://instagram.com/yourpage"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0a192f] focus:border-transparent outline-none transition-all"
@@ -101,7 +101,7 @@ export default function FollowUs() {
               </label>
               <input
                 {...register('linkedin_url', { 
-                  pattern: { value: /^https?:\/\/.*/, message: 'Must be a valid URL' } 
+                  pattern: { value: /^(https?:\/\/.*)?$/, message: 'Must be a valid URL' } 
                 })}
                 placeholder="https://linkedin.com/company/yourpage"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0a192f] focus:border-transparent outline-none transition-all"
@@ -117,7 +117,7 @@ export default function FollowUs() {
               </label>
               <input
                 {...register('twitter_url', { 
-                  pattern: { value: /^https?:\/\/.*/, message: 'Must be a valid URL' } 
+                  pattern: { value: /^(https?:\/\/.*)?$/, message: 'Must be a valid URL' } 
                 })}
                 placeholder="https://twitter.com/yourpage"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0a192f] focus:border-transparent outline-none transition-all"
