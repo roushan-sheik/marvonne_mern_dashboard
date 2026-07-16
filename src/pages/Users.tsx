@@ -14,11 +14,16 @@ export default function Users() {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [userToToggleStatus, setUserToToggleStatus] = useState<any>(null);
   const [toastMsg, setToastMsg] = useState('');
+  const [adminDeleteError, setAdminDeleteError] = useState<boolean>(false);
 
   const users = data || [];
 
-  const handleDeleteClick = (id: string) => {
-    setUserToDelete(id);
+  const handleDeleteClick = (user: any) => {
+    if (user.role === 'ADMIN') {
+      setAdminDeleteError(true);
+      return;
+    }
+    setUserToDelete(user.id);
   };
 
   const confirmDelete = async () => {
@@ -139,7 +144,7 @@ export default function Users() {
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium">
                     <button
-                      onClick={() => handleDeleteClick(user.id)}
+                      onClick={() => handleDeleteClick(user)}
                       className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors focus:outline-none"
                       disabled={isDeleting && userToDelete === user.id}
                     >
@@ -234,6 +239,29 @@ export default function Users() {
                 className={`flex-1 px-4 py-3 text-sm font-bold text-white rounded-xl transition-colors flex items-center justify-center disabled:opacity-50 shadow-md ${userToToggleStatus.status === 'ACTIVE' ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' : 'bg-green-500 hover:bg-green-600 shadow-green-500/20'}`}
               >
                 {isUpdatingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : (userToToggleStatus.status === 'ACTIVE' ? 'Block' : 'Unblock')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Delete Error Modal */}
+      {adminDeleteError && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl scale-100 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-2xl font-extrabold text-[#0a192f] mb-2 flex items-center">
+              <AlertCircle className="w-6 h-6 text-red-500 mr-2" />
+              Action Denied
+            </h3>
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              You cannot delete an Admin user.
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setAdminDeleteError(false)}
+                className="px-4 py-3 text-sm font-bold text-white bg-[#0a192f] hover:bg-[#0f3a4a] rounded-xl transition-colors w-full"
+              >
+                Okay
               </button>
             </div>
           </div>

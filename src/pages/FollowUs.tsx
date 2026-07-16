@@ -14,9 +14,14 @@ export default function FollowUs() {
     if (data?.data) {
       reset({
         facebook_url: data.data.facebook_url || '',
+        facebook_visible: data.data.facebook_visible !== undefined ? data.data.facebook_visible : true,
         instagram_url: data.data.instagram_url || '',
+        instagram_visible: data.data.instagram_visible !== undefined ? data.data.instagram_visible : true,
         linkedin_url: data.data.linkedin_url || '',
+        linkedin_visible: data.data.linkedin_visible !== undefined ? data.data.linkedin_visible : true,
         twitter_url: data.data.twitter_url || '',
+        twitter_visible: data.data.twitter_visible !== undefined ? data.data.twitter_visible : true,
+        is_visible: data.data.is_visible !== undefined ? data.data.is_visible : true,
       });
     }
   }, [data, reset]);
@@ -63,13 +68,19 @@ export default function FollowUs() {
             
             {/* Facebook */}
             <div className="space-y-2">
-              <label className="flex items-center text-sm font-bold text-gray-700">
-                <LinkIcon className="w-4 h-4 mr-2 text-blue-600" />
-                Facebook URL
-              </label>
+              <div className="flex justify-between items-center">
+                <label className="flex items-center text-sm font-bold text-gray-700">
+                  <LinkIcon className="w-4 h-4 mr-2 text-blue-600" />
+                  Facebook URL
+                </label>
+                <label className="flex items-center text-xs font-semibold text-gray-600 cursor-pointer hover:text-blue-600 transition-colors">
+                  <input type="checkbox" {...register('facebook_visible')} className="mr-1.5 w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500" />
+                  Show
+                </label>
+              </div>
               <input
                 {...register('facebook_url', { 
-                  pattern: { value: /^https?:\/\/.*/, message: 'Must be a valid URL' } 
+                  pattern: { value: /^(https?:\/\/.*)?$/, message: 'Must be a valid URL' } 
                 })}
                 placeholder="https://facebook.com/yourpage"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0a192f] focus:border-transparent outline-none transition-all"
@@ -79,13 +90,19 @@ export default function FollowUs() {
 
             {/* Instagram */}
             <div className="space-y-2">
-              <label className="flex items-center text-sm font-bold text-gray-700">
-                <LinkIcon className="w-4 h-4 mr-2 text-pink-600" />
-                Instagram URL
-              </label>
+              <div className="flex justify-between items-center">
+                <label className="flex items-center text-sm font-bold text-gray-700">
+                  <LinkIcon className="w-4 h-4 mr-2 text-pink-600" />
+                  Instagram URL
+                </label>
+                <label className="flex items-center text-xs font-semibold text-gray-600 cursor-pointer hover:text-pink-600 transition-colors">
+                  <input type="checkbox" {...register('instagram_visible')} className="mr-1.5 w-3.5 h-3.5 text-pink-600 rounded focus:ring-pink-500" />
+                  Show
+                </label>
+              </div>
               <input
                 {...register('instagram_url', { 
-                  pattern: { value: /^https?:\/\/.*/, message: 'Must be a valid URL' } 
+                  pattern: { value: /^(https?:\/\/.*)?$/, message: 'Must be a valid URL' } 
                 })}
                 placeholder="https://instagram.com/yourpage"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0a192f] focus:border-transparent outline-none transition-all"
@@ -95,13 +112,19 @@ export default function FollowUs() {
 
             {/* LinkedIn */}
             <div className="space-y-2">
-              <label className="flex items-center text-sm font-bold text-gray-700">
-                <LinkIcon className="w-4 h-4 mr-2 text-blue-700" />
-                LinkedIn URL
-              </label>
+              <div className="flex justify-between items-center">
+                <label className="flex items-center text-sm font-bold text-gray-700">
+                  <LinkIcon className="w-4 h-4 mr-2 text-blue-700" />
+                  LinkedIn URL
+                </label>
+                <label className="flex items-center text-xs font-semibold text-gray-600 cursor-pointer hover:text-blue-700 transition-colors">
+                  <input type="checkbox" {...register('linkedin_visible')} className="mr-1.5 w-3.5 h-3.5 text-blue-700 rounded focus:ring-blue-600" />
+                  Show
+                </label>
+              </div>
               <input
                 {...register('linkedin_url', { 
-                  pattern: { value: /^https?:\/\/.*/, message: 'Must be a valid URL' } 
+                  pattern: { value: /^(https?:\/\/.*)?$/, message: 'Must be a valid URL' } 
                 })}
                 placeholder="https://linkedin.com/company/yourpage"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0a192f] focus:border-transparent outline-none transition-all"
@@ -111,13 +134,19 @@ export default function FollowUs() {
 
             {/* Twitter */}
             <div className="space-y-2">
-              <label className="flex items-center text-sm font-bold text-gray-700">
-                <LinkIcon className="w-4 h-4 mr-2 text-blue-400" />
-                Twitter (X) URL
-              </label>
+              <div className="flex justify-between items-center">
+                <label className="flex items-center text-sm font-bold text-gray-700">
+                  <LinkIcon className="w-4 h-4 mr-2 text-blue-400" />
+                  Twitter (X) URL
+                </label>
+                <label className="flex items-center text-xs font-semibold text-gray-600 cursor-pointer hover:text-blue-400 transition-colors">
+                  <input type="checkbox" {...register('twitter_visible')} className="mr-1.5 w-3.5 h-3.5 text-blue-400 rounded focus:ring-blue-400" />
+                  Show
+                </label>
+              </div>
               <input
                 {...register('twitter_url', { 
-                  pattern: { value: /^https?:\/\/.*/, message: 'Must be a valid URL' } 
+                  pattern: { value: /^(https?:\/\/.*)?$/, message: 'Must be a valid URL' } 
                 })}
                 placeholder="https://twitter.com/yourpage"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0a192f] focus:border-transparent outline-none transition-all"
@@ -125,6 +154,18 @@ export default function FollowUs() {
               {errors.twitter_url && <p className="text-red-500 text-xs">{(errors.twitter_url as any).message}</p>}
             </div>
 
+          </div>
+
+          <div className="flex items-center space-x-3 pt-2">
+            <input
+              type="checkbox"
+              id="is_visible"
+              {...register('is_visible')}
+              className="w-5 h-5 text-[#0a192f] border-gray-300 rounded focus:ring-[#0a192f]"
+            />
+            <label htmlFor="is_visible" className="text-sm font-bold text-gray-700">
+              Show Follow Us Icons on Website
+            </label>
           </div>
 
           <div className="pt-6 flex justify-end">
