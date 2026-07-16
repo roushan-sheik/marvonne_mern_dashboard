@@ -14,13 +14,13 @@ export default function Users() {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [userToToggleStatus, setUserToToggleStatus] = useState<any>(null);
   const [toastMsg, setToastMsg] = useState('');
-  const [adminDeleteError, setAdminDeleteError] = useState<boolean>(false);
+  const [adminActionError, setAdminActionError] = useState<string | null>(null);
 
   const users = data || [];
 
   const handleDeleteClick = (user: any) => {
     if (user.role === 'ADMIN') {
-      setAdminDeleteError(true);
+      setAdminActionError('You cannot delete an Admin user.');
       return;
     }
     setUserToDelete(user.id);
@@ -40,6 +40,10 @@ export default function Users() {
   };
 
   const handleToggleStatusClick = (user: any) => {
+    if (user.role === 'ADMIN') {
+      setAdminActionError('You cannot block or unblock an Admin user.');
+      return;
+    }
     setUserToToggleStatus(user);
   };
 
@@ -245,8 +249,8 @@ export default function Users() {
         </div>
       )}
 
-      {/* Admin Delete Error Modal */}
-      {adminDeleteError && (
+      {/* Admin Action Error Modal */}
+      {adminActionError && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl scale-100 animate-in fade-in zoom-in duration-200">
             <h3 className="text-2xl font-extrabold text-[#0a192f] mb-2 flex items-center">
@@ -254,11 +258,11 @@ export default function Users() {
               Action Denied
             </h3>
             <p className="text-gray-600 mb-8 leading-relaxed">
-              You cannot delete an Admin user.
+              {adminActionError}
             </p>
             <div className="flex justify-end">
               <button
-                onClick={() => setAdminDeleteError(false)}
+                onClick={() => setAdminActionError(null)}
                 className="px-4 py-3 text-sm font-bold text-white bg-[#0a192f] hover:bg-[#0f3a4a] rounded-xl transition-colors w-full"
               >
                 Okay
